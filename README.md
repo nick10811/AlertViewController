@@ -14,6 +14,10 @@ avoid crashes if property is not available in the future.
 
 ![](https://github.com/stringcode86/AlertViewController/raw/master/screenshot.png)
 
+Nick added new feature. You can change image position on the center or bottom as well.
+
+![](https://github.com/nick10811/AlertViewController/raw/master/screenshot2.png)
+
 [stringcode.co.uk](http://www.stringcode.co.uk/?p=1156&preview=true)
 
 [@stringcode](https://twitter.com/stringcode)

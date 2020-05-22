@@ -5,6 +5,7 @@
 //  Created by Michael Inger on 26/07/2017.
 //  Copyright © 2017 stringCode ltd. All rights reserved.
 //
+//  Revised by Nick Yang (nick10811) on 08/05/2020.
 
 import UIKit
 
@@ -15,21 +16,60 @@ import UIKit
 class AlertController: UIAlertController {
     /// - Return: value that was set on `title`
     private(set) var originalTitle: String?
-    private var spaceAdjustedTitle: String = ""
+    private(set) var originalMessage: String?
+    private var spaceAdjustedText: String = ""
     private weak var imageView: UIImageView? = nil
+    private var imagePosition: ImagePosition = .top
     private var previousImgViewSize: CGSize = .zero
+    
+    private var originalTitleHeight: CGFloat {
+        get {
+            let label = UILabel()
+            label.text = originalTitle
+            label.lineBreakMode = .byWordWrapping
+            label.numberOfLines = 0
+            label.font = UIFont.preferredFont(forTextStyle: .headline)
+            label.frame = CGRect(x: 0, y: 0, width: 243, height: 20)
+            label.sizeToFit()
+            return label.frame.height
+        }
+    }
+    
+    private var originalMessageHeight: CGFloat {
+        get {
+            let label = UILabel()
+            label.text = originalMessage
+            label.lineBreakMode = .byWordWrapping
+            label.numberOfLines = 0
+            label.font = UIFont.preferredFont(forTextStyle: .subheadline)
+            label.frame = CGRect(x: 0, y: 0, width: 243, height: 20)
+            label.sizeToFit()
+            return label.frame.height
+        }
+    }
     
     override var title: String? {
         didSet {
             // Keep track of original title
-            if title != spaceAdjustedTitle {
+            if title != spaceAdjustedText {
                 originalTitle = title
             }
         }
     }
     
+    override var message: String? {
+        didSet {
+            // Keep track of original message
+            if message != spaceAdjustedText {
+                originalMessage = message
+            }
+        }
+    }
+    
     /// - parameter image: `UIImage` to be displayed about title label
-    func setTitleImage(_ image: UIImage?) {
+    func setTitleImage(_ image: UIImage?, position: ImagePosition = .top) {
+        self.imagePosition = position
+        
         guard let imageView = self.imageView else {
             let imageView = UIImageView(image: image)
             self.view.addSubview(imageView)
@@ -49,22 +89,40 @@ class AlertController: UIAlertController {
         // Adjust title if image size has changed
         if previousImgViewSize != imageView.bounds.size {
             previousImgViewSize = imageView.bounds.size
-            adjustTitle(for: imageView)
+            adjustText(for: imageView)
         }
         // Position `imageView`
         let linesCount = newLinesCount(for: imageView)
         let padding = Constants.padding(for: preferredStyle)
         imageView.center.x = view.bounds.width / 2.0
-        imageView.center.y = padding + linesCount * lineHeight / 2.0
+        // count height of Text to move the position y of image
+        switch imagePosition {
+        case .top:
+            imageView.center.y = padding + linesCount * lineHeight / 2.0
+        case .center:
+            imageView.center.y = padding + originalTitleHeight + linesCount * lineHeight / 2.0
+        case .bottom:
+            imageView.center.y = originalTitleHeight + originalMessageHeight + linesCount * lineHeight / 2.0
+        }
         super.viewDidLayoutSubviews()
     }
     
-    /// Adds appropriate number of "\n" to `title` text to make space for `imageView`
-    private func adjustTitle(for imageView: UIImageView) {
+    /// Adds appropriate number of '\n' to text to make space for `imageView`
+    private func adjustText(for imageView: UIImageView) {
         let linesCount = Int(newLinesCount(for: imageView))
         let lines = (0..<linesCount).map({ _ in "\n" }).reduce("", +)
-        spaceAdjustedTitle = lines + (originalTitle ?? "")
-        title = spaceAdjustedTitle
+        
+        switch imagePosition {
+        case .top:
+            spaceAdjustedText = lines + (originalTitle ?? "")
+            title = spaceAdjustedText
+        case .center:
+            spaceAdjustedText = (originalTitle ?? "") + "\n" + lines
+            title = spaceAdjustedText
+        case .bottom:
+            spaceAdjustedText = (originalMessage ?? "") + "\n" + lines
+            message = spaceAdjustedText
+        }
     }
     
     /// - Return: Number new line chars needed to make enough space for `imageView`
@@ -84,5 +142,9 @@ class AlertController: UIAlertController {
         static func padding(for style: UIAlertControllerStyle) -> CGFloat {
             return style == .alert ? Constants.paddingAlert : Constants.paddingSheet
         }
+    }
+    
+    enum ImagePosition {
+        case top, center, bottom
     }
 }
