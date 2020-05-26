@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     @IBAction func doStuffAction(_ sender: Any) {
         // Create AlertController
         let alert = AlertController(title: "Alert Title", message: "Description:\n1) detail 1.\n2) detail 2.", preferredStyle: .alert)
-        alert.setTitleImage(UIImage(named: "alert"), position: .center)
+        alert.setTitleImage(UIImage(named: "alert2"), position: .center)
         // Add actions
         let action = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         action.actionImage = UIImage(named: "close")

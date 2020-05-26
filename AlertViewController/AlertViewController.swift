@@ -86,6 +86,9 @@ class AlertController: UIAlertController {
             super.viewDidLayoutSubviews()
             return
         }
+        // Automatically resize `imageView`
+        self.resizeImage(for: imageView)
+        
         // Adjust title if image size has changed
         if previousImgViewSize != imageView.bounds.size {
             previousImgViewSize = imageView.bounds.size
@@ -122,6 +125,17 @@ class AlertController: UIAlertController {
         case .bottom:
             spaceAdjustedText = (originalMessage ?? "") + "\n" + lines
             message = spaceAdjustedText
+        }
+    }
+    
+    /// - Resize image
+    private func resizeImage(for imageView: UIImageView) {
+        let ratio: CGFloat = 0.8
+        let originalHeight = imageView.frame.height
+        let originalWidth = imageView.frame.width
+        let realWidth = self.view.frame.width * ratio
+        if originalWidth > realWidth {
+            imageView.frame = CGRect(x: 0, y: 0, width: realWidth, height: (originalHeight/originalWidth)*realWidth)
         }
     }
     
