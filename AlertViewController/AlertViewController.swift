@@ -24,27 +24,13 @@ class AlertController: UIAlertController {
     
     private var originalTitleHeight: CGFloat {
         get {
-            let label = UILabel()
-            label.text = originalTitle
-            label.lineBreakMode = .byWordWrapping
-            label.numberOfLines = 0
-            label.font = UIFont.preferredFont(forTextStyle: .headline)
-            label.frame = CGRect(x: 0, y: 0, width: 243, height: 20)
-            label.sizeToFit()
-            return label.frame.height
+            return getDefaultLabel(originalTitle, font: titleFont).frame.height
         }
     }
     
     private var originalMessageHeight: CGFloat {
         get {
-            let label = UILabel()
-            label.text = originalMessage
-            label.lineBreakMode = .byWordWrapping
-            label.numberOfLines = 0
-            label.font = UIFont.preferredFont(forTextStyle: .subheadline)
-            label.frame = CGRect(x: 0, y: 0, width: 243, height: 20)
-            label.sizeToFit()
-            return label.frame.height
+            return getDefaultLabel(originalMessage, font: messageFont).frame.height
         }
     }
     
@@ -105,7 +91,7 @@ class AlertController: UIAlertController {
         case .center:
             imageView.center.y = padding + originalTitleHeight + linesCount * lineHeight / 2.0
         case .bottom:
-            imageView.center.y = originalTitleHeight + originalMessageHeight + linesCount * lineHeight / 2.0
+            imageView.center.y = padding + originalTitleHeight + originalMessageHeight + linesCount * lineHeight / 2.0
         }
         super.viewDidLayoutSubviews()
     }
@@ -120,10 +106,10 @@ class AlertController: UIAlertController {
             spaceAdjustedText = lines + (originalTitle ?? "")
             title = spaceAdjustedText
         case .center:
-            spaceAdjustedText = (originalTitle ?? "") + "\n" + lines
+            spaceAdjustedText = (originalTitle ?? "") + lines
             title = spaceAdjustedText
         case .bottom:
-            spaceAdjustedText = (originalMessage ?? "") + "\n" + lines
+            spaceAdjustedText = (originalMessage ?? "") + lines
             message = spaceAdjustedText
         }
     }
@@ -146,9 +132,34 @@ class AlertController: UIAlertController {
     
     /// Calculated based on system font line height
     private lazy var lineHeight: CGFloat = {
-        let style: UIFontTextStyle = self.preferredStyle == .alert ? .headline : .callout
-        return UIFont.preferredFont(forTextStyle: style).pointSize
+        switch imagePosition {
+        case .top, .center:
+            return titleFont.pointSize
+        case .bottom:
+            return messageFont.pointSize
+        }
     }()
+    
+    /// Default font
+    private lazy var titleFont: UIFont = {
+        let style: UIFontTextStyle = self.preferredStyle == .alert ? .headline : .callout
+        return UIFont.preferredFont(forTextStyle: style)
+    }()
+
+    private lazy var messageFont: UIFont = {
+        return UIFont.preferredFont(forTextStyle: .subheadline)
+    }()
+    
+    private func getDefaultLabel(_ text: String?, font: UIFont) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.lineBreakMode = .byWordWrapping
+        label.numberOfLines = 0
+        label.font = font
+        label.frame = CGRect(x: 0, y: 0, width: 243, height: 20)
+        label.sizeToFit()
+        return label
+    }
     
     struct Constants {
         static var paddingAlert: CGFloat = 22
